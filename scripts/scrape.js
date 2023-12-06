@@ -30,10 +30,14 @@ export class TwitterScraper extends EventEmitter {
         );
     }
 
-    async run() {
+    /**
+     *
+     * @param {"top" | "latest"} type
+     */
+    async run(type = "latest") {
         try {
             this.browser = await puppeteer.launch({
-                headless: process.env.NODE_ENV === "production",
+                headless: process.env.NODE_ENV === "production" && "new",
                 defaultViewport: null,
                 args: [
                     "--disable-notifications",
@@ -49,7 +53,9 @@ export class TwitterScraper extends EventEmitter {
             await page.setCookie(...this.cookies);
 
             await page.goto(
-                `https://twitter.com/search?q=${this.tagsStr}&src=typed_query&f=live`,
+                `https://twitter.com/search?q=${this.tagsStr}&src=typed_query${
+                    type == "latest" ? "&f=live" : ""
+                }`,
                 {
                     waitUntil: "networkidle2",
                 }
@@ -71,7 +77,11 @@ export class TwitterScraper extends EventEmitter {
                     let isValidTweet = true;
 
                     for (const tag of this.tags) {
-                        if (!tweet.content.toLowerCase().includes(`#${tag.toLowerCase()}`)) {
+                        if (
+                            !tweet.content
+                                .toLowerCase()
+                                .includes(`#${tag.toLowerCase()}`)
+                        ) {
                             console.log(
                                 `Tweet ${tweet.origin} does not contain tag ${tag}`
                             );
