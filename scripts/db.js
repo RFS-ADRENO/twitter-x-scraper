@@ -21,11 +21,21 @@ if (!fs.existsSync(dataPath)) {
 
 export const data = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
 
-export async function add(arr) {
-    let appendData = [];
+export async function add(arr, pageID) {
+    const appendData = [];
+    if (!pageID) throw new Error("pageID is not defined");
+
+    if (!data.some((e) => e.pageID === pageID)) {
+        data.push({
+            pageID,
+            data: [],
+        });
+    }
+
+		const pageData = data.find((e) => e.pageID === pageID);
+
     for (const item of arr) {
-        if (data.some((e) => e.origin === item.origin)) continue;
-        if (appendData.some((e) => e.origin === item.origin)) continue;
+				if (pageData.data.some((e) => e.origin === item.origin)) continue;
 
         console.log();
         console.log(`Saving ${item.origin}`);
@@ -57,8 +67,11 @@ export async function add(arr) {
                 );
 
                 if (!imgResolutions.includes(curImgRes)) {
-									item.imageSrc[i] = imgURL.replace(`name=${curImgRes}`, `name=medium`);
-									imgURL = item.imageSrc[i];
+                    item.imageSrc[i] = imgURL.replace(
+                        `name=${curImgRes}`,
+                        `name=medium`
+                    );
+                    imgURL = item.imageSrc[i];
                 }
 
                 const imgPath = path.join(imagesPath, `${imgName}.${imgExt}`);
@@ -86,10 +99,10 @@ export async function add(arr) {
             console.log(`Saved ${imgPath}`);
         }
 
+				pageData.data.push(item);
         appendData.push(item);
     }
 
-    data.push(...appendData);
     console.log();
 
     return appendData;

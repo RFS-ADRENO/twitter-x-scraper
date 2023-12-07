@@ -3,7 +3,7 @@ import { add, save } from "./db.js";
 import { EventEmitter } from "events";
 
 export class TwitterScraper extends EventEmitter {
-    constructor(tags, cookieStr) {
+    constructor(tags, cookieStr, pageID) {
         super();
         if (tags.length === 0) {
             console.error("Please provide a tag");
@@ -28,6 +28,7 @@ export class TwitterScraper extends EventEmitter {
         this.tagsStr = encodeURIComponent(
             tags.map((tag) => `#${tag}`).join(" ")
         );
+				this.pageID = pageID;
     }
 
     /**
@@ -96,7 +97,7 @@ export class TwitterScraper extends EventEmitter {
                 }
             }
 
-            const appendData = await add(tweets);
+            const appendData = await add(tweets, this.pageID);
             save();
 
             this.emit("data", appendData);

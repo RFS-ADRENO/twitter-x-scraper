@@ -1,7 +1,7 @@
 import axios from "axios";
 
 //https://graph.facebook.com/v18.0/me/photos
-export async function publish(data, bot, chatId) {
+export async function publish(data, bot, chatId, pageToken) {
 	for (const each of data) {
 		const { content, origin, imageSrc } = each;
 
@@ -9,7 +9,7 @@ export async function publish(data, bot, chatId) {
 
 		for (const src of imageSrc) {
 			const res = await axios.post(
-				`https://graph.facebook.com/v18.0/me/photos?access_token=${process.env.fbtoken}`,
+				`https://graph.facebook.com/v18.0/me/photos?access_token=${pageToken}`,
 				{
 					url: src,
 					published: false,
@@ -21,7 +21,7 @@ export async function publish(data, bot, chatId) {
 		}
 
 		const res = await axios.post(
-			`https://graph.facebook.com/v18.0/me/feed?access_token=${process.env.fbtoken}&fields=permalink_url`,
+			`https://graph.facebook.com/v18.0/me/feed?access_token=${pageToken}&fields=permalink_url`,
 			{
 				message: `${content}\n\n${origin}`,
 				attached_media: uploadedImageIDs.map(e => {

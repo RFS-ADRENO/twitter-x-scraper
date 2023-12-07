@@ -1,7 +1,7 @@
 {
 	"name": "twitter_x_scraping",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Scrape Twitter for tweets containing a certain keyword and repost to Facebook Page, controlled by Telegram Bot.",
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
