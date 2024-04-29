@@ -43,11 +43,13 @@ for (const key in process.env) {
         pageTokens.push({
             tokenName,
             token,
-            id: !token ? null : await getPAGEID(token, tokenName).catch(e => {
-                console.log("[ ERROR ] Failed to get pageID for", tokenName);
-                console.log(e.response.data);
-                return null;
-            }),
+            id: !token
+                ? null
+                : await getPAGEID(token, tokenName).catch((e) => {
+                      console.log("[ ERROR ] Failed to get pageID for", tokenName);
+                      console.log(e.response.data);
+                      return null;
+                  }),
         });
     }
 }
@@ -57,7 +59,7 @@ console.log();
 const processData = (pageToken) => {
     return async (data) => {
         await bot.sendMessage(wid, `Received ${data.length} tweets`);
-				// Send tweets info to Telegram group
+        // Send tweets info to Telegram group
         // for (const each of data) {
         //     const { content, origin, imgLocalPath } = each;
         //     const caption = `${content}\n\n${origin}`;
@@ -107,11 +109,7 @@ const scrape = async (text, type, pageID) => {
             await bot.sendMessage(wid, "Scraping...");
             const args = text.split(/\s+/);
 
-            const scraper = new TwitterScraper(
-                args,
-                process.env.TWITTER_COOKIE,
-                pageID
-            );
+            const scraper = new TwitterScraper(args, process.env.TWITTER_COOKIE, pageID);
 
             scraper.run(type);
             scraper.on("data", resolve);
@@ -162,14 +160,14 @@ bot.onText(/\/help/, async (msg) => {
 });
 
 bot.onText(/\/uid/, async (msg) => {
-		if (wid != msg.chat.id) return;
+    if (wid != msg.chat.id) return;
 
-		await bot.sendMessage(wid, msg.from.id);
+    await bot.sendMessage(wid, msg.from.id);
 });
 
 function processStartCommandData(msg, type) {
     if (wid != msg.chat.id) return;
-		if (!ADMIN_IDS.includes(msg.from.id.toString())) return;
+    if (!ADMIN_IDS.includes(msg.from.id.toString())) return;
 
     const args = msg.text.split(/\s+/).slice(1);
 
@@ -186,32 +184,23 @@ function processStartCommandData(msg, type) {
 
     const parsedAssignedTo = parseInt(assignedTo);
     if (isNaN(parsedAssignedTo))
-        return bot.sendMessage(
-            wid,
-            "Invalid page number, use /pages to see all pages"
-        );
+        return bot.sendMessage(wid, "Invalid page number, use /pages to see all pages");
     if (parsedAssignedTo < 1 || parsedAssignedTo > pageTokens.length) {
-        return bot.sendMessage(
-            wid,
-            "Invalid page number, use /pages to see all pages"
-        );
+        return bot.sendMessage(wid, "Invalid page number, use /pages to see all pages");
     }
 
     const index = parsedAssignedTo - 1;
     const pageToken = pageTokens[index];
 
     if (!pageToken.token)
-        return bot.sendMessage(
-            wid,
-            "Page is inactive, use /pages to see all active pages"
-        );
+        return bot.sendMessage(wid, "Page is inactive, use /pages to see all active pages");
 
     jobs.push({
         status: JOB_STATUS.PENDING,
         text: content,
         type: type,
         pageToken: pageToken.token,
-				pageTokenName: pageToken.tokenName,
+        pageTokenName: pageToken.tokenName,
         pageID: pageToken.id,
     });
 
@@ -240,9 +229,9 @@ bot.onText(/\/pages/, async (msg) => {
         "=== PAGES ===\n" +
             pageTokens
                 .map((e, i) => {
-                    return `${i + 1}.  [${!e.token ? "    " : " * "}]  ${
-                        e.tokenName
-                    } (${e.id})`;
+                    return `${i + 1}.  [${!e.token || !e.id ? "    " : " * "}]  ${e.tokenName} (${
+                        e.id
+                    })`;
                 })
                 .join("\n")
     );
@@ -257,8 +246,11 @@ async function timeFunc() {
     if (job.status == JOB_STATUS.ACTIVE) return;
 
     console.log(`[ JOB ] Starting job "${job.text}" (${job.type})`);
-		const index = pageTokens.findIndex((e) => e.token == job.pageToken);
-		await bot.sendMessage(wid, `Page: ${job.pageTokenName} (${index + 1})\nStarting job "${job.text}" (${job.type})`);
+    const index = pageTokens.findIndex((e) => e.token == job.pageToken);
+    await bot.sendMessage(
+        wid,
+        `Page: ${job.pageTokenName} (${index + 1})\nStarting job "${job.text}" (${job.type})`
+    );
 
     job.status = JOB_STATUS.ACTIVE;
 
