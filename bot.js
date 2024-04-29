@@ -43,7 +43,11 @@ for (const key in process.env) {
         pageTokens.push({
             tokenName,
             token,
-            id: !token ? null : await getPAGEID(token, tokenName),
+            id: !token ? null : await getPAGEID(token, tokenName).catch(e => {
+                console.log("[ ERROR ] Failed to get pageID for", tokenName);
+                console.log(e.response.data);
+                return null;
+            }),
         });
     }
 }
