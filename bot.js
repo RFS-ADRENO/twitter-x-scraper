@@ -147,6 +147,20 @@ bot.onText(/\/stop/, async (msg) => {
     process.exit(0);
 });
 
+bot.onText(/\/help/, async (msg) => {
+    if (wid != msg.chat.id) return;
+
+    await bot.sendMessage(
+        wid,
+        "=== HELP ===\n" +
+            "/startTop pageNumber | hashtag1 hashtag2\n" +
+            "/startLatest pageNumber | hashtag1 hashtag2\n" +
+            "/pages\n" +
+            "/stop\n" +
+            "/help"
+    );
+});
+
 bot.onText(/\/uid/, async (msg) => {
 		if (wid != msg.chat.id) return;
 
